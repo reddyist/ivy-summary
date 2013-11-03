@@ -1,0 +1,7 @@
+<!--
+  This view is used to render the installed plugins page.
+-->
+<div>
+  Display's ivy dependent packages installed in a build in build/project summary
+  view
+</div>
