@@ -4,9 +4,16 @@
  */
 package org.jenkinsci.plugins.ivy_summary;
 
+import hudson.AbortException;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.matrix.MatrixAggregatable;
+import hudson.matrix.MatrixAggregator;
+import hudson.matrix.MatrixBuild;
+import hudson.matrix.MatrixRun;
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Action;
 import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
@@ -29,8 +36,9 @@ import java.util.regex.Pattern;
  *
  * @author vareddy
  */
-public class IvySummaryRecorder extends Recorder {
+public class IvySummaryRecorder extends Recorder implements MatrixAggregatable {
     
+    private static boolean setMatrixSummary = false;
     
     /**
     * Required constructor. Our Recorder, which extends Publisher, which implements Describable
@@ -40,7 +48,7 @@ public class IvySummaryRecorder extends Recorder {
     */
     @DataBoundConstructor
     public IvySummaryRecorder() {
-    
+        
     }
     
 
@@ -97,13 +105,6 @@ public class IvySummaryRecorder extends Recorder {
     @Override
     public boolean perform(Build<?, ?> build, Launcher launcher, BuildListener listener) 
             throws InterruptedException, IOException {
-//        FirstBuildAction action = build.getAction(FirstBuildAction.class);
-//        if(action != null) {
-//            if(!action.hasEvenRandomNumber()) {
-//                build.setResult(Result.UNSTABLE);
-//            }
-//        }
-        //String sum = "Testing build summary";
         IvySummaryAction sumAction = new IvySummaryAction(parseLog(build.getLogFile(), 
                                                           IvySummaryAction.REGEX));
         build.addAction(sumAction);
@@ -131,5 +132,28 @@ public class IvySummaryRecorder extends Recorder {
         return deps;
     }
     
+    public MatrixAggregator createAggregator(final MatrixBuild build,
+                Launcher launcher, final BuildListener listener) {
+
+        return new MatrixAggregator(build, launcher, listener) {
+                @Override
+                public boolean endRun(MatrixRun run) throws InterruptedException,
+                                IOException {
+                        if (isSetForMatrix()) {
+                            return true;
+                        }
+                        setMatrixSummary = true;
+                        if (run.getAction(IvySummaryAction.class) != null) {
+                            build.addAction(run.getAction(IvySummaryAction.class));
+                        }
+                        
+                        return true;
+                }
+        };
+    }
     
+    public boolean isSetForMatrix() {
+        return setMatrixSummary;
+    }
+
 }

@@ -5,14 +5,14 @@
 package org.jenkinsci.plugins.ivy_summary;
 
 import hudson.model.Action;
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import org.kohsuke.stapler.export.Exported;
-import org.kohsuke.stapler.export.ExportedBean;
+//import java.util.regex.Pattern;
+//import java.util.regex.Matcher;
 
 /**
  *
@@ -23,9 +23,9 @@ public class IvySummaryAction implements Action {
     
     private final HashMap<String, ArrayList> sum;
     public static final String REGEX = "found .*#(.*);(.*) in";
-    private final String iconPath = "warning.gif";
-    
-    @Exported public String getIconPath() { return iconPath; }
+//    private final String iconPath = "warning.gif";
+//    
+//    @Exported public String getIconPath() { return iconPath; }
     
     public IvySummaryAction(HashMap<String, ArrayList> ivySummary) {
         this.sum = ivySummary;
